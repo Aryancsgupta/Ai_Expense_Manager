@@ -71,9 +71,7 @@ const Expenses = () => {
                 }
             }
         } catch (err) {
-            console.error('AI Suggestion Error:', err);
-
-            // If token is invalid or expired, redirect to login
+            console.error('AI Suggestion Error:', err);
             if (err.response?.status === 401) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
@@ -114,8 +112,7 @@ const Expenses = () => {
                 description: '',
                 date: new Date().toISOString().split('T')[0],
             });
-            setBill(null);
-            // Reset file input manually
+            setBill(null);
             const fileInput = document.getElementById('bill-input');
             if (fileInput) fileInput.value = '';
 
@@ -155,7 +152,7 @@ const Expenses = () => {
             <h1 className="text-4xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400">Expenses</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Add Expense Form */}
+                
                 <div className="card h-fit lg:col-span-1">
                     <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                         <div className="bg-accent/10 p-2 rounded-lg text-accent"><Plus size={20} /></div>
@@ -209,19 +206,7 @@ const Expenses = () => {
                             <input
                                 id="bill-input"
                                 type="file"
-                                accept="image/*"
-                                onChange={(e) => setBill(e.target.files[0])}
-                                className="input-field text-sm py-2"
-                            />
-                        </div>
-
-                        <button type="submit" className="btn btn-primary w-full mt-2" disabled={loading}>
-                            <Plus size={18} /> Add Expense
-                        </button>
-                    </form>
-                </div>
-
-                {/* Expense List */}
+                                accept="image}
                 <div className="card lg:col-span-2 flex flex-col h-full">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-bold">History</h3>

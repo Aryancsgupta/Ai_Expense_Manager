@@ -5,31 +5,21 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const app = express();
-
-// Middleware
+const app = express();
 app.use(express.json());
-app.use(cors());
-
-// Serve static files from uploads folder
+app.use(cors());
 const path = require('path');
 const fs = require('fs');
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
 }
-app.use('/uploads', express.static(uploadsDir));
-
-// DB Config
-const db = process.env.MONGO_URI;
-
-// Connect to MongoDB
+app.use('/uploads', express.static(uploadsDir));
+const db = process.env.MONGO_URI;
 mongoose
     .connect(db)
     .then(() => console.log('MongoDB Connected'))
-    .catch((err) => console.log(err));
-
-// Routes
+    .catch((err) => console.log(err));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/ai', require('./routes/ai'));

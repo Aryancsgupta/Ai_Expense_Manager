@@ -31,7 +31,7 @@ const Login = () => {
     return (
         <div className="min-h-[80vh] flex items-center justify-center p-4">
             <div className="card w-full max-w-md animate-fade-in relative overflow-hidden">
-                {/* Decorative blob */}
+                
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/20 blur-[60px] rounded-full"></div>
 
                 <div className="text-center mb-8">

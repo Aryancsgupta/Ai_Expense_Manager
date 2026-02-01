@@ -32,7 +32,6 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 pb-12 animate-fade-in pt-8">
             <h1 className="text-4xl font-extrabold mb-8 text-red-500">Admin Dashboard</h1>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="card flex items-center gap-5">
                     <div className="p-4 rounded-xl bg-sky-500/10 text-sky-500">
@@ -63,7 +62,6 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* User List */}
             <div className="card">
                 <h3 className="text-xl font-bold mb-6">System Users</h3>
                 <div className="table-container">

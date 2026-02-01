@@ -42,7 +42,6 @@ const Navbar = () => {
                     AI Expense Manager
                 </Link>
 
-                {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-8">
                     {token ? (
                         <>
@@ -91,13 +90,11 @@ const Navbar = () => {
                     )}
                 </div>
 
-                {/* Mobile Menu Button */}
                 <button className="md:hidden text-text-primary p-2 hover:bg-white/5 rounded-lg transition-colors" onClick={toggleMenu}>
                     {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
                 </button>
             </div>
 
-            {/* Mobile Dropdown */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div

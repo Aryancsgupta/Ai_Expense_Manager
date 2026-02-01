@@ -2,9 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-
-// Register
+const User = require('../models/User');
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, currency, role } = req.body;
@@ -22,7 +20,7 @@ router.post('/register', async (req, res) => {
             email,
             password: hashedPassword,
             currency: currency || 'USD',
-            role: role || 'user', // In a real app, role should be restricted
+            role: role || 'user', 
         });
 
         await user.save();
@@ -47,9 +45,7 @@ router.post('/register', async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server error');
     }
-});
-
-// Login
+});
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;

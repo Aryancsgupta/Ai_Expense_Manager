@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema({
         default: 'user',
     },
     currency: {
-        type: String, // 'USD', 'INR', 'AED'
+        type: String, 
         default: 'USD',
     },
 }, { timestamps: true });

@@ -29,7 +29,6 @@
     @apply w-full bg-bg-secondary/50 border border-slate-700 text-text-primary px-5 py-3.5 rounded-xl outline-none transition-all duration-200 focus:border-accent focus:ring-4 focus:ring-accent/10 focus:bg-bg-secondary/80;
   }
 
-  /* Glass Table */
   .table-container {
     @apply w-full overflow-x-auto rounded-xl;
   }
@@ -63,7 +62,6 @@
   }
 }
 
-/* Animations */
 @keyframes fadeInScale {
   from {
     opacity: 0;

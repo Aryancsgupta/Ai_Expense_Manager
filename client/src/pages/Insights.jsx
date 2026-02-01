@@ -41,7 +41,7 @@ const Insights = () => {
             </div>
 
             <div className="card relative overflow-hidden">
-                {/* Decorative background glow */}
+                
                 <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-8 border-b border-white/5 pb-6">

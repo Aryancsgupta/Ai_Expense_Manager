@@ -13,11 +13,7 @@ const openai = new OpenAI({
     baseURL: process.env.GROQ_API_KEY ? "https://api.groq.com/openai/v1" : undefined
 });
 
-const AI_MODEL = process.env.GROQ_API_KEY ? "llama-3.3-70b-versatile" : "gpt-3.5-turbo";
-
-// @route   POST /api/ai/categorize
-// @desc    Suggest category based on description
-// @access  Private
+const AI_MODEL = process.env.GROQ_API_KEY ? "llama-3.3-70b-versatile" : "gpt-3.5-turbo";
 const fs = require('fs');
 const path = require('path');
 
@@ -52,44 +48,32 @@ router.post('/categorize', auth, async (req, res) => {
         console.log('AI suggested category:', suggestedCategory);
         res.json({ category: suggestedCategory });
     } catch (err) {
-        console.error('OpenAI Error Details:', err.message);
-
-        // Log error to file
+        console.error('OpenAI Error Details:', err.message);
         try {
             const errorLog = `[${new Date().toISOString()}] Error for ${title}: ${err.message}\nStatus: ${err.status}\nCode: ${err.code}\n\n`;
             fs.appendFileSync(path.join(__dirname, '../ai_errors.log'), errorLog);
         } catch (fsErr) {
             console.error('Failed to log error to file:', fsErr.message);
-        }
-
-        // Return fallback category with detailed error info if needed for frontend
+        }
         res.status(200).json({
             category: 'Other',
             error: err.message,
             isFallback: true
         });
     }
-});
-
-// @route   GET /api/ai/insights
-// @desc    Get AI insights on spending
-// @access  Private
+});
 router.get('/insights', auth, async (req, res) => {
     try {
         const expenses = await Expense.find({ user: req.user.id });
 
         if (expenses.length === 0) {
             return res.json({ insight: "No expenses recorded yet. Add some expenses to get insights!" });
-        }
-
-        // Check if API Key is present
+        }
         if (!hasGroqKey && !process.env.OPENAI_API_KEY) {
             return res.json({ insight: "AI Insights are unavailable. Please add GROQ_API_KEY or OPENAI_API_KEY to your .env file." });
         }
 
-        const { lang = 'English' } = req.query;
-
-        // Simplify data for token limit
+        const { lang = 'English' } = req.query;
         const expenseSummary = expenses.map(e => `${e.date.toISOString().split('T')[0]}: ${e.title} ($${e.amount}) - ${e.category}`).join('\n');
 
         const prompt = `
@@ -110,9 +94,7 @@ router.get('/insights', auth, async (req, res) => {
         res.json({ insight: response.choices[0].message.content });
 
     } catch (err) {
-        console.error('OpenAI Insights Error:', err.message);
-
-        // Log error to file
+        console.error('OpenAI Insights Error:', err.message);
         try {
             const errorLog = `[${new Date().toISOString()}] Insights Error: ${err.message}\nStatus: ${err.status}\nCode: ${err.code}\n\n`;
             fs.appendFileSync(path.join(__dirname, '../ai_errors.log'), errorLog);

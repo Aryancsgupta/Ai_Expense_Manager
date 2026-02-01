@@ -60,7 +60,6 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-6 pb-12 animate-fade-in pt-8">
             <h1 className="text-4xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400">Dashboard</h1>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="card flex flex-col justify-between group">
                     <div className="flex justify-between items-start">
@@ -105,7 +104,6 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Charts & History */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="card min-h-[450px] flex flex-col">
                     <h3 className="text-xl font-bold mb-6">Spending by Category</h3>
