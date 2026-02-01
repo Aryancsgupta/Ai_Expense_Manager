@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Trash2, Sparkles, Plus, Calendar, DollarSign, Tag, FileText } from 'lucide-react';
 import { getCurrencySymbol } from '../utils/currency';
+import API_URL from '../utils/api';
 
 const Expenses = () => {
     const [expenses, setExpenses] = useState([]);
@@ -30,7 +31,7 @@ const Expenses = () => {
 
     const fetchExpenses = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/expenses', {
+            const res = await axios.get(`${API_URL}/api/expenses`, {
                 headers: { 'x-auth-token': token },
             });
             setExpenses(res.data);
@@ -56,7 +57,7 @@ const Expenses = () => {
         setAiLoading(true);
         try {
             const res = await axios.post(
-                'http://localhost:5000/api/ai/categorize',
+                `${API_URL}/api/ai/categorize`,
                 {
                     description: formData.description || formData.title,
                     title: formData.title,
@@ -71,7 +72,7 @@ const Expenses = () => {
                 }
             }
         } catch (err) {
-            console.error('AI Suggestion Error:', err);
+            console.error('AI Suggestion Error:', err);
             if (err.response?.status === 401) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
@@ -99,7 +100,7 @@ const Expenses = () => {
         if (bill) data.append('bill', bill);
 
         try {
-            await axios.post('http://localhost:5000/api/expenses', data, {
+            await axios.post(`${API_URL}/api/expenses`, data, {
                 headers: {
                     'x-auth-token': token,
                     'Content-Type': 'multipart/form-data'
@@ -112,7 +113,7 @@ const Expenses = () => {
                 description: '',
                 date: new Date().toISOString().split('T')[0],
             });
-            setBill(null);
+            setBill(null);
             const fileInput = document.getElementById('bill-input');
             if (fileInput) fileInput.value = '';
 
@@ -133,7 +134,7 @@ const Expenses = () => {
     const deleteExpense = async (id) => {
         if (!confirm('Are you sure?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/expenses/${id}`, {
+            await axios.delete(`${API_URL}/api/expenses/${id}`, {
                 headers: { 'x-auth-token': token },
             });
             fetchExpenses();
@@ -152,7 +153,7 @@ const Expenses = () => {
             <h1 className="text-4xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400">Expenses</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
+
                 <div className="card h-fit lg:col-span-1">
                     <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                         <div className="bg-accent/10 p-2 rounded-lg text-accent"><Plus size={20} /></div>
@@ -206,7 +207,17 @@ const Expenses = () => {
                             <input
                                 id="bill-input"
                                 type="file"
-                                accept="image}
+                                accept="image/*"
+                                onChange={(e) => setBill(e.target.files[0])}
+                                className="input-field file:bg-accent/10 file:text-accent file:border-none file:rounded-lg file:px-3 file:py-1 file:mr-4 cursor-pointer"
+                            />
+                        </div>
+
+                        <button type="submit" className="btn btn-primary w-full mt-2" disabled={loading}>
+                            {loading ? <span className="animate-spin text-center w-full block">●</span> : 'Add Expense'}
+                        </button>
+                    </form>
+                </div>
                 <div className="card lg:col-span-2 flex flex-col h-full">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-bold">History</h3>
@@ -238,7 +249,7 @@ const Expenses = () => {
                                             <div className="flex items-center gap-2">
                                                 {exp.billUrl && (
                                                     <a
-                                                        href={`http://localhost:5000${exp.billUrl}`}
+                                                        href={`${API_URL}${exp.billUrl}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="p-2 text-text-secondary hover:text-accent hover:bg-accent/10 rounded-lg transition-colors border border-transparent"

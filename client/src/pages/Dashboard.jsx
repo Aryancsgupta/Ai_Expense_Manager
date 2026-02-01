@@ -4,6 +4,7 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Wallet, TrendingUp, CreditCard, Activity } from 'lucide-react';
 import { getCurrencySymbol } from '../utils/currency';
+import API_URL from '../utils/api';
 
 const Dashboard = () => {
     const [expenses, setExpenses] = useState([]);
@@ -23,7 +24,7 @@ const Dashboard = () => {
         const fetchExpenses = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/expenses', {
+                const res = await axios.get(`${API_URL}/api/expenses`, {
                     headers: { 'x-auth-token': token },
                 });
                 setExpenses(res.data);

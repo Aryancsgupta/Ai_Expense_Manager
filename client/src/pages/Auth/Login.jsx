@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, ArrowRight } from 'lucide-react';
+import API_URL from '../../utils/api';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ const Login = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+            const res = await axios.post(`${API_URL}/api/auth/login`, formData);
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('user', JSON.stringify(res.data.user));
             navigate('/');
@@ -31,7 +32,7 @@ const Login = () => {
     return (
         <div className="min-h-[80vh] flex items-center justify-center p-4">
             <div className="card w-full max-w-md animate-fade-in relative overflow-hidden">
-                
+
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/20 blur-[60px] rounded-full"></div>
 
                 <div className="text-center mb-8">

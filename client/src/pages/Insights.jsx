@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { Lightbulb, Sparkles, Globe } from 'lucide-react';
+import API_URL from '../utils/api';
 
 const Insights = () => {
     const [insight, setInsight] = useState('');
@@ -19,7 +20,7 @@ const Insights = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/ai/insights?lang=${lang}`, {
+            const res = await axios.get(`${API_URL}/api/ai/insights?lang=${lang}`, {
                 headers: { 'x-auth-token': token },
             });
             setInsight(res.data.insight);
@@ -41,7 +42,7 @@ const Insights = () => {
             </div>
 
             <div className="card relative overflow-hidden">
-                
+
                 <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-8 border-b border-white/5 pb-6">

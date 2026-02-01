@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Users, DollarSign, Activity } from 'lucide-react';
+import API_URL from '../utils/api';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -13,8 +14,8 @@ const AdminDashboard = () => {
                 const token = localStorage.getItem('token');
                 const config = { headers: { 'x-auth-token': token } };
 
-                const statsRes = await axios.get('http://localhost:5000/api/admin/system-stats', config);
-                const usersRes = await axios.get('http://localhost:5000/api/admin/users', config);
+                const statsRes = await axios.get(`${API_URL}/api/admin/system-stats`, config);
+                const usersRes = await axios.get(`${API_URL}/api/admin/users`, config);
 
                 setStats(statsRes.data);
                 setUsers(usersRes.data);
