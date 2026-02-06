@@ -28,6 +28,11 @@ mongoose
     .then(() => console.log('MongoDB Connected'))
     .catch((err) => console.log(err));
 
+// Root Route
+app.get('/', (req, res) => {
+    res.json({ message: "AI Expense Manager API is running..." });
+});
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/ai', require('./routes/ai'));
