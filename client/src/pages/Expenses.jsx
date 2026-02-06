@@ -103,7 +103,6 @@ const Expenses = () => {
             await axios.post(`${API_URL}/api/expenses`, data, {
                 headers: {
                     'x-auth-token': token,
-                    'Content-Type': 'multipart/form-data'
                 },
             });
             setFormData({
