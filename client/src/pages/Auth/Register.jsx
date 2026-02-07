@@ -37,8 +37,11 @@ const Register = () => {
             localStorage.setItem('user', JSON.stringify(res.data.user));
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.msg || 'Registration Failed');
+            console.error('Registration error:', err);
+            const message = err.response?.data?.msg || err.message || 'Registration Failed';
+            setError(message);
         }
+
     };
 
     return (
