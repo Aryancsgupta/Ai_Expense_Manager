@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/User');
+
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, currency, role } = req.body;
@@ -20,7 +21,7 @@ router.post('/register', async (req, res) => {
             email,
             password: hashedPassword,
             currency: currency || 'USD',
-            role: role || 'user', 
+            role: role || 'user',
         });
 
         await user.save();
@@ -43,9 +44,10 @@ router.post('/register', async (req, res) => {
         );
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ msg: 'Server error' });
     }
-});
+});
+
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -87,7 +89,7 @@ router.post('/login', async (req, res) => {
         );
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ msg: 'Server error' });
     }
 });
 
