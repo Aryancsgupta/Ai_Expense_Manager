@@ -70,4 +70,40 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/budget/:id
+// @desc    Update a budget amount
+router.put('/:id', auth, async (req, res) => {
+    const { amount } = req.body;
+    try {
+        let budget = await Budget.findById(req.params.id);
+        if (!budget) return res.status(404).json({ msg: 'Budget not found' });
+        if (budget.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+        budget.amount = amount;
+        await budget.save();
+        res.json(budget);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   DELETE api/budget/:id
+// @desc    Delete a budget
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        let budget = await Budget.findById(req.params.id);
+        if (!budget) return res.status(404).json({ msg: 'Budget not found' });
+        if (budget.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+        await Budget.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'Budget removed' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

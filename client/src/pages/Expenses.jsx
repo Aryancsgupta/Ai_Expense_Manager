@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Trash2, Sparkles, Plus, Calendar, DollarSign, Tag, FileText, Download, Search, Filter, RefreshCw, Scan } from 'lucide-react';
+import { Trash2, Sparkles, Plus, FileText, Download, Search, RefreshCw, Scan, Pencil, X, Check } from 'lucide-react';
 import { getCurrencySymbol } from '../utils/currency';
 import { CURRENCIES } from '../utils/currencies';
 import API_URL from '../utils/api';
@@ -45,6 +45,18 @@ const Expenses = () => {
     const [loading, setLoading] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
     const [scanLoading, setScanLoading] = useState(false);
+
+    // Edit state
+    const [editingExpense, setEditingExpense] = useState(null);
+    const [editForm, setEditForm] = useState({
+        title: '',
+        amount: '',
+        category: '',
+        description: '',
+        date: '',
+        time: ''
+    });
+    const [editLoading, setEditLoading] = useState(false);
 
     const token = localStorage.getItem('token');
     const currencySymbol = getCurrencySymbol(user?.currency || 'USD');
@@ -180,6 +192,53 @@ const Expenses = () => {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    // Open edit modal with pre-filled values
+    const openEditModal = (exp) => {
+        const expDate = new Date(exp.date);
+        const dateStr = expDate.toISOString().split('T')[0];
+        const timeStr = `${String(expDate.getHours()).padStart(2, '0')}:${String(expDate.getMinutes()).padStart(2, '0')}`;
+        setEditForm({
+            title: exp.title,
+            amount: exp.amount,
+            category: exp.category,
+            description: exp.description || '',
+            date: dateStr,
+            time: timeStr
+        });
+        setEditingExpense(exp);
+    };
+
+    const closeEditModal = () => {
+        setEditingExpense(null);
+    };
+
+    const onEditChange = (e) => {
+        setEditForm({ ...editForm, [e.target.name]: e.target.value });
+    };
+
+    const onEditSubmit = async (e) => {
+        e.preventDefault();
+        setEditLoading(true);
+        try {
+            const combinedDate = new Date(`${editForm.date}T${editForm.time}`);
+            await axios.put(`${API_URL}/api/expenses/${editingExpense._id}`, {
+                title: editForm.title,
+                amount: editForm.amount,
+                category: editForm.category,
+                description: editForm.description,
+                date: combinedDate.toISOString()
+            }, {
+                headers: { 'x-auth-token': token }
+            });
+            closeEditModal();
+            fetchExpenses();
+        } catch (err) {
+            console.error('Error updating expense:', err);
+            alert('Failed to update expense');
+        }
+        setEditLoading(false);
     };
 
     const categories = ['Food', 'Transport', 'Utilities', 'Entertainment', 'Health', 'Shopping', 'Travel', 'Education', 'Other'];
@@ -321,6 +380,13 @@ const Expenses = () => {
                                             <td className="whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
                                                     {exp.billUrl && <a href={`${API_URL}${exp.billUrl}`} target="_blank" rel="noreferrer" className="p-1.5 hover:bg-white/5 rounded-lg text-text-secondary transition-colors"><FileText size={18} /></a>}
+                                                    <button
+                                                        onClick={() => openEditModal(exp)}
+                                                        className="p-1.5 hover:bg-accent/10 rounded-lg text-text-secondary hover:text-accent transition-colors"
+                                                        title="Edit expense"
+                                                    >
+                                                        <Pencil size={18} />
+                                                    </button>
                                                     <button onClick={() => deleteExpense(exp._id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-text-secondary hover:text-red-400 transition-colors"><Trash2 size={18} /></button>
                                                 </div>
                                             </td>
@@ -332,6 +398,123 @@ const Expenses = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Expense Modal */}
+            {editingExpense && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        onClick={closeEditModal}
+                    />
+                    {/* Modal */}
+                    <div className="relative card w-full max-w-md shadow-2xl animate-fade-in">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                <div className="bg-accent/10 p-2 rounded-lg text-accent"><Pencil size={18} /></div>
+                                Edit Expense
+                            </h3>
+                            <button
+                                onClick={closeEditModal}
+                                className="p-1.5 hover:bg-white/10 rounded-lg text-text-secondary transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={onEditSubmit} className="flex flex-col gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Title</label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={editForm.title}
+                                    onChange={onEditChange}
+                                    required
+                                    className="input-field"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-secondary">Amount</label>
+                                    <input
+                                        type="number"
+                                        name="amount"
+                                        value={editForm.amount}
+                                        onChange={onEditChange}
+                                        required
+                                        min="0.01"
+                                        step="0.01"
+                                        className="input-field"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-secondary">Category</label>
+                                    <select name="category" value={editForm.category} onChange={onEditChange} required className="input-field">
+                                        <option value="">Select</option>
+                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-secondary">Date</label>
+                                    <input
+                                        type="date"
+                                        name="date"
+                                        value={editForm.date}
+                                        onChange={onEditChange}
+                                        required
+                                        className="input-field"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-text-secondary">Time</label>
+                                    <input
+                                        type="time"
+                                        name="time"
+                                        value={editForm.time}
+                                        onChange={onEditChange}
+                                        required
+                                        className="input-field"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Description</label>
+                                <input
+                                    type="text"
+                                    name="description"
+                                    value={editForm.description}
+                                    onChange={onEditChange}
+                                    placeholder="Optional"
+                                    className="input-field"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 mt-2">
+                                <button
+                                    type="button"
+                                    onClick={closeEditModal}
+                                    className="btn btn-secondary flex-1"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary flex-1 flex items-center justify-center gap-2"
+                                    disabled={editLoading}
+                                >
+                                    {editLoading ? 'Saving...' : <><Check size={16} /> Save Changes</>}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
