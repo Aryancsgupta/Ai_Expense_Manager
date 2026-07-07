@@ -48,6 +48,10 @@ const Budget = () => {
 
     const onSubmit = async (e) => {
         e.preventDefault();
+        if (parseFloat(formData.amount) <= 0) {
+            alert('Budget amount must be greater than 0.');
+            return;
+        }
         setLoading(true);
         try {
             await axios.post(`${API_URL}/api/budget`, formData, {
@@ -74,6 +78,10 @@ const Budget = () => {
 
     const onEditSubmit = async (e) => {
         e.preventDefault();
+        if (parseFloat(editAmount) <= 0) {
+            alert('Budget amount must be greater than 0.');
+            return;
+        }
         setEditLoading(true);
         try {
             await axios.put(`${API_URL}/api/budget/${editingBudget._id}`, { amount: editAmount }, {
@@ -123,7 +131,7 @@ const Budget = () => {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Amount ({currencySymbol})</label>
-                            <input type="number" name="amount" value={formData.amount} onChange={onChange} required placeholder="0.00" className="input-field" />
+                            <input type="number" name="amount" value={formData.amount} onChange={onChange} required placeholder="0.00" min="0.01" step="0.01" className="input-field" />
                         </div>
                         <button type="submit" className="btn btn-primary w-full mt-2" disabled={loading}>
                             {loading ? 'Setting...' : 'Set Budget'}
