@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Target, AlertCircle, Pencil, Trash2, X, Check } from 'lucide-react';
+import { Plus, Target, AlertCircle, Pencil, Trash2, X, Check, Flag, TrendingUp } from 'lucide-react';
 import { getCurrencySymbol } from '../utils/currency';
 import API_URL from '../utils/api';
 
@@ -28,6 +28,51 @@ const Budget = () => {
     })();
     const currencySymbol = getCurrencySymbol(user?.currency || 'USD');
 
+    // Goals state
+    const [goals, setGoals] = useState([]);
+    const [goalForm, setGoalForm] = useState({ title: '', targetAmount: '', currentAmount: '', deadline: '' });
+    const [goalLoading, setGoalLoading] = useState(false);
+    const [editingGoal, setEditingGoal] = useState(null);
+    const [goalEditAmt, setGoalEditAmt] = useState('');
+    const [goalEditLoading, setGoalEditLoading] = useState(false);
+
+    const fetchGoals = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/goals`, { headers: { 'x-auth-token': token } });
+            setGoals(res.data);
+        } catch (err) { console.error(err); }
+    };
+
+    const onGoalSubmit = async (e) => {
+        e.preventDefault();
+        setGoalLoading(true);
+        try {
+            await axios.post(`${API_URL}/api/goals`, goalForm, { headers: { 'x-auth-token': token } });
+            setGoalForm({ title: '', targetAmount: '', currentAmount: '', deadline: '' });
+            fetchGoals();
+        } catch (err) { console.error(err); alert('Failed to create goal'); }
+        setGoalLoading(false);
+    };
+
+    const deleteGoal = async (id) => {
+        if (!confirm('Delete this goal?')) return;
+        try {
+            await axios.delete(`${API_URL}/api/goals/${id}`, { headers: { 'x-auth-token': token } });
+            fetchGoals();
+        } catch (err) { console.error(err); }
+    };
+
+    const saveGoalAmount = async (e) => {
+        e.preventDefault();
+        setGoalEditLoading(true);
+        try {
+            await axios.put(`${API_URL}/api/goals/${editingGoal._id}`, { currentAmount: goalEditAmt }, { headers: { 'x-auth-token': token } });
+            setEditingGoal(null);
+            fetchGoals();
+        } catch (err) { console.error(err); }
+        setGoalEditLoading(false);
+    };
+
     const fetchBudgets = async () => {
         try {
             const res = await axios.get(`${API_URL}/api/budget`, {
@@ -41,6 +86,7 @@ const Budget = () => {
 
     useEffect(() => {
         fetchBudgets();
+        fetchGoals();
     }, []);
 
     const onChange = (e) =>
@@ -260,6 +306,123 @@ const Budget = () => {
                                     disabled={editLoading}
                                 >
                                     {editLoading ? 'Saving...' : <><Check size={16} /> Save</>}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ===== Savings Goals Section ===== */}
+            <div className="mt-12">
+                <h2 className="text-2xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 flex items-center gap-2">
+                    <Flag size={24} className="text-emerald-400" /> Savings Goals
+                </h2>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Create Goal */}
+                    <div className="card h-fit lg:col-span-1">
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                            <div className="bg-emerald-500/10 p-2 rounded-lg text-emerald-400"><Plus size={20} /></div>
+                            New Goal
+                        </h3>
+                        <form onSubmit={onGoalSubmit} className="flex flex-col gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Goal Title</label>
+                                <input type="text" value={goalForm.title} onChange={e => setGoalForm({...goalForm, title: e.target.value})} required placeholder="e.g. New Laptop" className="input-field" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Target Amount ({currencySymbol})</label>
+                                <input type="number" value={goalForm.targetAmount} onChange={e => setGoalForm({...goalForm, targetAmount: e.target.value})} required min="0.01" step="0.01" placeholder="50000" className="input-field" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Already Saved ({currencySymbol}) <span className="text-xs opacity-50">(optional)</span></label>
+                                <input type="number" value={goalForm.currentAmount} onChange={e => setGoalForm({...goalForm, currentAmount: e.target.value})} min="0" step="0.01" placeholder="0" className="input-field" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Deadline</label>
+                                <input type="date" value={goalForm.deadline} onChange={e => setGoalForm({...goalForm, deadline: e.target.value})} required className="input-field" />
+                            </div>
+                            <button type="submit" className="btn btn-primary w-full mt-2" style={{background: 'linear-gradient(135deg, #10b981, #0d9488)'}} disabled={goalLoading}>
+                                {goalLoading ? 'Creating...' : 'Create Goal'}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Goal Progress Cards */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {goals.length === 0 ? (
+                            <div className="card text-center py-12 text-text-secondary">
+                                <Flag size={48} className="mx-auto mb-4 opacity-20" />
+                                <p>No savings goals yet. Create one to start tracking!</p>
+                            </div>
+                        ) : (
+                            goals.map(goal => {
+                                const percent = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+                                const isComplete = goal.currentAmount >= goal.targetAmount;
+                                const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                                const isExpired = daysLeft < 0;
+                                return (
+                                    <div key={goal._id} className="card group">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg font-bold text-white">{goal.title}</span>
+                                                    {isComplete && <span className="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full font-semibold">✓ Complete</span>}
+                                                </div>
+                                                <div className="text-sm text-text-secondary mt-0.5">
+                                                    {currencySymbol}{goal.currentAmount.toFixed(2)} saved of {currencySymbol}{goal.targetAmount.toFixed(2)}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${isExpired ? 'bg-red-500/20 text-red-400' : 'bg-white/5 text-text-secondary'}`}>
+                                                    {isExpired ? 'Expired' : `${daysLeft}d left`}
+                                                </span>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => { setEditingGoal(goal); setGoalEditAmt(goal.currentAmount); }} className="p-1.5 hover:bg-emerald-500/10 rounded-lg text-text-secondary hover:text-emerald-400 transition-colors"><TrendingUp size={15} /></button>
+                                                    <button onClick={() => deleteGoal(goal._id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-text-secondary hover:text-red-400 transition-colors"><Trash2 size={15} /></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full transition-all duration-700 rounded-full"
+                                                style={{ width: `${percent}%`, background: isComplete ? '#10b981' : 'linear-gradient(90deg, #10b981, #0d9488)' }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-between mt-1.5">
+                                            <span className="text-xs text-text-secondary">{percent.toFixed(0)}% saved</span>
+                                            <span className="text-xs text-text-secondary">Target: {new Date(goal.deadline).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Update Savings Modal */}
+            {editingGoal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingGoal(null)} />
+                    <div className="relative card w-full max-w-sm shadow-2xl animate-fade-in">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                <div className="bg-emerald-500/10 p-2 rounded-lg text-emerald-400"><TrendingUp size={18} /></div>
+                                Update Savings
+                            </h3>
+                            <button onClick={() => setEditingGoal(null)} className="p-1.5 hover:bg-white/10 rounded-lg text-text-secondary"><X size={20} /></button>
+                        </div>
+                        <p className="text-text-secondary text-sm mb-4">Goal: <span className="text-white font-semibold">{editingGoal.title}</span></p>
+                        <form onSubmit={saveGoalAmount} className="flex flex-col gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Current Saved Amount ({currencySymbol})</label>
+                                <input type="number" value={goalEditAmt} onChange={e => setGoalEditAmt(e.target.value)} required min="0" step="0.01" className="input-field" autoFocus />
+                            </div>
+                            <div className="flex gap-3">
+                                <button type="button" onClick={() => setEditingGoal(null)} className="btn btn-secondary flex-1">Cancel</button>
+                                <button type="submit" className="btn btn-primary flex-1 flex items-center justify-center gap-2" disabled={goalEditLoading}>
+                                    {goalEditLoading ? 'Saving...' : <><Check size={16} /> Save</>}
                                 </button>
                             </div>
                         </form>

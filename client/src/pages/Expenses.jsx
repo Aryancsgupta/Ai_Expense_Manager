@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Trash2, Sparkles, Plus, FileText, Download, Search, RefreshCw, Scan, Pencil, X, Check } from 'lucide-react';
+import { Trash2, Sparkles, Plus, FileText, Download, Search, RefreshCw, Scan, Pencil, X, Check, LayoutList, Scissors, AlertTriangle } from 'lucide-react';
 import { getCurrencySymbol } from '../utils/currency';
 import { CURRENCIES } from '../utils/currencies';
 import API_URL from '../utils/api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Expenses = () => {
     const user = (() => {
@@ -58,6 +60,15 @@ const Expenses = () => {
     });
     const [editLoading, setEditLoading] = useState(false);
 
+    // New feature states
+    const [activeTab, setActiveTab] = useState('history'); // 'history' | 'recurring'
+    const [recurringTemplates, setRecurringTemplates] = useState([]);
+    const [splitBillLoading, setSplitBillLoading] = useState(false);
+    const [splitItems, setSplitItems] = useState(null); // array of {title, amount, category}
+    const [savingAllItems, setSavingAllItems] = useState(false);
+    const [splitBillFile, setSplitBillFile] = useState(null);
+    const [pdfLoading, setPdfLoading] = useState(false);
+
     const token = localStorage.getItem('token');
     const currencySymbol = getCurrencySymbol(user?.currency || 'USD');
 
@@ -93,6 +104,110 @@ const Expenses = () => {
 
     const exportToCSV = () => {
         window.open(`${API_URL}/api/expenses/export?token=${token}`, '_blank');
+    };
+
+    const fetchRecurringTemplates = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/expenses/recurring-templates`, {
+                headers: { 'x-auth-token': token },
+            });
+            setRecurringTemplates(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        if (activeTab === 'recurring') fetchRecurringTemplates();
+    }, [activeTab, fetchRecurringTemplates]);
+
+    const exportToPDF = async () => {
+        setPdfLoading(true);
+        try {
+            const doc = new jsPDF();
+            // Header
+            doc.setFillColor(109, 40, 217);
+            doc.rect(0, 0, 210, 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.text('AI Expense Manager', 14, 12);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 22);
+            // Summary
+            const totalAmt = expenses.reduce((s, e) => s + e.amount, 0);
+            doc.setTextColor(50, 50, 50);
+            doc.setFontSize(12);
+            doc.text(`Total Expenses: ${currencySymbol}${totalAmt.toFixed(2)}   |   Records: ${expenses.length}`, 14, 42);
+            // Table
+            const tableRows = expenses.map(e => [
+                new Date(e.date).toLocaleDateString(),
+                e.title,
+                e.category,
+                `${getCurrencySymbol(e.currency || user?.currency || 'INR')}${e.amount.toFixed(2)}`,
+                e.description || ''
+            ]);
+            autoTable(doc, {
+                startY: 50,
+                head: [['Date', 'Title', 'Category', 'Amount', 'Description']],
+                body: tableRows,
+                styles: { fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [109, 40, 217], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [245, 243, 255] },
+            });
+            doc.save(`expenses_${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (err) {
+            console.error('PDF Error:', err);
+            alert('Failed to generate PDF');
+        }
+        setPdfLoading(false);
+    };
+
+    const splitBill = async () => {
+        if (!splitBillFile) return alert('Please select a bill image first');
+        setSplitBillLoading(true);
+        setSplitItems(null);
+        const data = new FormData();
+        data.append('bill', splitBillFile);
+        try {
+            const res = await axios.post(`${API_URL}/api/ai/split-bill`, data, {
+                headers: { 'x-auth-token': token, 'Content-Type': 'multipart/form-data' },
+            });
+            setSplitItems(res.data.items || []);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to split bill. Please try again.');
+        }
+        setSplitBillLoading(false);
+    };
+
+    const saveAllSplitItems = async () => {
+        if (!splitItems || splitItems.length === 0) return;
+        setSavingAllItems(true);
+        try {
+            for (const item of splitItems) {
+                const data = new FormData();
+                data.append('title', item.title);
+                data.append('amount', item.amount);
+                data.append('category', item.category);
+                data.append('date', new Date().toISOString());
+                data.append('currency', user?.currency || 'INR');
+                data.append('isRecurring', 'false');
+                data.append('frequency', 'none');
+                await axios.post(`${API_URL}/api/expenses`, data, {
+                    headers: { 'x-auth-token': token },
+                });
+            }
+            setSplitItems(null);
+            setSplitBillFile(null);
+            fetchExpenses();
+            alert(`${splitItems.length} expenses saved successfully!`);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to save all items');
+        }
+        setSavingAllItems(false);
     };
 
     const scanBill = async () => {
@@ -247,9 +362,14 @@ const Expenses = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12 animate-fade-in pt-8 w-full overflow-hidden">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <h1 className="text-3xl sm:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-accent to-pink-500">Expenses</h1>
-                <button onClick={exportToCSV} className="btn btn-secondary flex items-center gap-2 w-full sm:w-auto justify-center">
-                    <Download size={18} /> Export CSV
-                </button>
+                <div className="flex gap-2 flex-wrap">
+                    <button onClick={exportToCSV} className="btn btn-secondary flex items-center gap-2">
+                        <Download size={16} /> CSV
+                    </button>
+                    <button onClick={exportToPDF} disabled={pdfLoading || expenses.length === 0} className="btn btn-secondary flex items-center gap-2">
+                        <FileText size={16} /> {pdfLoading ? 'Generating...' : 'PDF'}
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -338,6 +458,36 @@ const Expenses = () => {
 
                 <div className="card lg:col-span-2 overflow-hidden">
                     <div className="flex flex-col gap-6">
+                        {/* Tab switcher */}
+                        <div className="flex gap-2 bg-slate-800/50 p-1 rounded-xl border border-white/5 w-fit">
+                            <button
+                                onClick={() => setActiveTab('history')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                                    activeTab === 'history' ? 'bg-slate-700 text-white shadow-lg' : 'text-text-secondary hover:text-white'
+                                }`}
+                            >
+                                <LayoutList size={16} /> History
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('recurring')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                                    activeTab === 'recurring' ? 'bg-slate-700 text-white shadow-lg' : 'text-text-secondary hover:text-white'
+                                }`}
+                            >
+                                <RefreshCw size={16} /> Recurring
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('splitbill')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                                    activeTab === 'splitbill' ? 'bg-slate-700 text-white shadow-lg' : 'text-text-secondary hover:text-white'
+                                }`}
+                            >
+                                <Scissors size={16} /> Split Bill
+                            </button>
+                        </div>
+
+                        {/* History Tab */}
+                        {activeTab === 'history' && (<>
                         <div className="flex flex-col gap-4 w-full">
                             <div className="relative w-full">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" size={18} />
@@ -395,6 +545,109 @@ const Expenses = () => {
                                 </tbody>
                             </table>
                         </div>
+                        </>)}
+
+                        {/* Recurring Templates Tab */}
+                        {activeTab === 'recurring' && (
+                            <div className="flex flex-col gap-4">
+                                <p className="text-sm text-text-secondary">These are your active recurring expense templates. Deleting a template will stop future auto-generation.</p>
+                                {recurringTemplates.length === 0 ? (
+                                    <div className="text-center py-10 text-text-secondary">
+                                        <RefreshCw size={40} className="mx-auto mb-3 opacity-30" />
+                                        <p>No recurring templates found.</p>
+                                        <p className="text-xs mt-1">Add an expense with &quot;Recurring?&quot; checked to create one.</p>
+                                    </div>
+                                ) : (
+                                    <div className="table-container overflow-x-auto">
+                                        <table className="glass-table min-w-[500px]">
+                                            <thead><tr>
+                                                <th>Title</th>
+                                                <th>Amount</th>
+                                                <th>Frequency</th>
+                                                <th>Started</th>
+                                                <th>Last Generated</th>
+                                                <th>Actions</th>
+                                            </tr></thead>
+                                            <tbody>
+                                                {recurringTemplates.map(t => (
+                                                    <tr key={t._id}>
+                                                        <td className="font-semibold text-white flex items-center gap-2"><RefreshCw size={12} className="text-accent" />{t.title}</td>
+                                                        <td className="font-bold text-white">-{getCurrencySymbol(t.currency || 'INR')}{t.amount.toFixed(2)}</td>
+                                                        <td><span className="badge badge-accent capitalize">{t.frequency}</span></td>
+                                                        <td className="text-text-secondary text-sm">{new Date(t.date).toLocaleDateString()}</td>
+                                                        <td className="text-text-secondary text-sm">{t.lastGeneratedDate ? new Date(t.lastGeneratedDate).toLocaleDateString() : 'Not yet'}</td>
+                                                        <td>
+                                                            <button onClick={() => deleteExpense(t._id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-text-secondary hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Split Bill Tab */}
+                        {activeTab === 'splitbill' && (
+                            <div className="flex flex-col gap-6">
+                                <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+                                    <p className="text-sm text-text-secondary mb-3">Upload a receipt to automatically detect and split all individual line items into separate expenses using AI.</p>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <input type="file" accept="image/*" onChange={e => setSplitBillFile(e.target.files[0])} className="input-field text-xs flex-1" />
+                                        <button
+                                            onClick={splitBill}
+                                            disabled={splitBillLoading || !splitBillFile}
+                                            className="btn btn-primary flex items-center gap-2 justify-center"
+                                        >
+                                            <Scissors size={16} className={splitBillLoading ? 'animate-spin' : ''} />
+                                            {splitBillLoading ? 'Splitting...' : 'Split with AI'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {splitItems && splitItems.length > 0 && (
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="font-bold text-white">Detected Items ({splitItems.length})</h4>
+                                            <button
+                                                onClick={saveAllSplitItems}
+                                                disabled={savingAllItems}
+                                                className="btn btn-primary flex items-center gap-2"
+                                            >
+                                                <Check size={16} />
+                                                {savingAllItems ? 'Saving...' : `Save All ${splitItems.length} Expenses`}
+                                            </button>
+                                        </div>
+                                        <div className="table-container overflow-x-auto">
+                                            <table className="glass-table min-w-[400px]">
+                                                <thead><tr>
+                                                    <th>Item</th>
+                                                    <th>Category</th>
+                                                    <th>Amount</th>
+                                                </tr></thead>
+                                                <tbody>
+                                                    {splitItems.map((item, idx) => (
+                                                        <tr key={idx}>
+                                                            <td className="font-semibold text-white">{item.title}</td>
+                                                            <td><span className="badge badge-accent">{item.category}</span></td>
+                                                            <td className="font-bold text-white">{getCurrencySymbol(user?.currency || 'INR')}{Number(item.amount).toFixed(2)}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {splitItems && splitItems.length === 0 && (
+                                    <div className="text-center py-6 text-text-secondary">
+                                        <AlertTriangle size={36} className="mx-auto mb-2 opacity-40" />
+                                        <p>No items detected. Try a clearer image.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

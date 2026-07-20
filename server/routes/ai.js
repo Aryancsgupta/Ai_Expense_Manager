@@ -172,4 +172,117 @@ router.get('/insights', auth, async (req, res) => {
     }
 });
 
+// @route   GET api/ai/forecast
+// @desc    AI-powered budget forecast based on spending velocity
+router.get('/forecast', auth, async (req, res) => {
+    try {
+        const expenses = await Expense.find({ user: req.user.id });
+        if (expenses.length === 0) {
+            return res.json({ forecast: null, msg: 'No expenses found to forecast.' });
+        }
+        if (!hasGroqKey && !process.env.OPENAI_API_KEY) {
+            return res.json({ forecast: null, msg: 'AI API key missing.' });
+        }
+
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const daysPassed = now.getDate();
+        const daysLeft = daysInMonth - daysPassed;
+
+        const thisMonthExpenses = expenses.filter(e => new Date(e.date) >= startOfMonth);
+        const totalSpentThisMonth = thisMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+        // Category breakdown
+        const categoryMap = {};
+        for (const e of thisMonthExpenses) {
+            if (!categoryMap[e.category]) categoryMap[e.category] = 0;
+            categoryMap[e.category] += e.amount;
+        }
+        const categorySummary = Object.entries(categoryMap)
+            .map(([cat, amt]) => `${cat}: ₹${amt.toFixed(2)}`)
+            .join(', ');
+
+        const dailyRate = daysPassed > 0 ? totalSpentThisMonth / daysPassed : 0;
+        const projectedTotal = totalSpentThisMonth + (dailyRate * daysLeft);
+
+        const prompt = `
+You are a personal finance advisor. Given spending data for this month:
+- Days elapsed: ${daysPassed}/${daysInMonth}
+- Total spent so far: ₹${totalSpentThisMonth.toFixed(2)}
+- Projected total by month end (at current rate): ₹${projectedTotal.toFixed(2)}
+- Category breakdown: ${categorySummary || 'N/A'}
+
+Provide:
+1. A one-sentence forecast summary.
+2. Top 2 specific actionable tips to reduce spending.
+3. Which category is highest risk.
+
+Keep it short, friendly, and in English. Format as plain text bullet points.`;
+
+        const response = await openai.chat.completions.create({
+            model: AI_MODEL,
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 400,
+            temperature: 0.6,
+        });
+
+        res.json({
+            forecast: response.choices[0].message.content,
+            totalSpentThisMonth,
+            projectedTotal,
+            daysPassed,
+            daysInMonth,
+            daysLeft,
+            dailyRate,
+            categoryBreakdown: categoryMap,
+        });
+    } catch (err) {
+        console.error('AI Forecast Error:', err.message);
+        res.status(500).json({ msg: 'Failed to generate forecast', error: err.message });
+    }
+});
+
+// @route   POST api/ai/split-bill
+// @desc    OCR scan a receipt and split into multiple expense line items
+router.post('/split-bill', [auth, upload.single('bill')], async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ msg: 'No file uploaded' });
+    }
+    try {
+        const { data: { text } } = await Tesseract.recognize(
+            req.file.path, 'eng', { logger: m => console.log(m) }
+        );
+        fs.unlinkSync(req.file.path);
+
+        if (!hasGroqKey && !process.env.OPENAI_API_KEY) {
+            return res.status(400).json({ msg: 'AI API key missing. Cannot split bill.' });
+        }
+
+        const prompt = `
+Extract ALL individual line items from this bill/receipt text. 
+For each item return an object with: { "title": string, "amount": number, "category": one of [Food, Transport, Utilities, Entertainment, Health, Shopping, Travel, Education, Other] }
+Return ONLY a valid JSON array. No markdown, no explanation, no code fences.
+
+Bill text:
+${text}`;
+
+        const response = await openai.chat.completions.create({
+            model: AI_MODEL,
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 1000,
+            temperature: 0.2,
+        });
+
+        let rawContent = response.choices[0].message.content.trim();
+        const jsonMatch = rawContent.match(/\[[\s\S]*\]/);
+        if (jsonMatch) rawContent = jsonMatch[0];
+        const items = JSON.parse(rawContent);
+        res.json({ items, rawText: text });
+    } catch (err) {
+        console.error('Bill Split Error:', err.message);
+        res.status(500).json({ msg: 'Failed to split bill', error: err.message });
+    }
+});
+
 module.exports = router;

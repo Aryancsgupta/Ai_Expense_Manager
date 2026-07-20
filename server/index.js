@@ -72,6 +72,7 @@ app.use('/api/ai', require('./routes/ai'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/budget', require('./routes/budget'));
 app.use('/api/feedback', require('./routes/feedback'));
+app.use('/api/goals', require('./routes/goals'));
 
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

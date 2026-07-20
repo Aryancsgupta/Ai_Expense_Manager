@@ -61,6 +61,18 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// @route   GET api/expenses/recurring-templates
+// @desc    Get all active recurring expense templates
+router.get('/recurring-templates', auth, async (req, res) => {
+    try {
+        const templates = await Expense.find({ user: req.user.id, isRecurring: true }).sort({ date: -1 });
+        res.json(templates);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 router.get('/export', auth, async (req, res) => {
     try {
         const expenses = await Expense.find({ user: req.user.id }).sort({ date: -1 });
