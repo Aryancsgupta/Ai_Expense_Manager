@@ -22,7 +22,7 @@ app.use(cors({
     origin: ['https://ai-expense-manager-pi.vercel.app', process.env.FRONTEND_URL],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'x-auth-token']
+    allowedHeaders: ['Content-Type', 'x-auth-token', 'x-timezone']
 }));
 
 

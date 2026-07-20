@@ -24,6 +24,10 @@ const upload = multer({ storage: storage });
 
 router.get('/', auth, async (req, res) => {
     try {
+        // Process recurring expenses for the current user before returning them
+        const timezone = req.headers['x-timezone'] || 'Asia/Kolkata';
+        await processRecurringExpenses(req.user.id, timezone);
+        
         const { search, category, startDate, endDate, minAmount, maxAmount } = req.query;
         
         let query = { user: req.user.id };
@@ -141,7 +145,8 @@ router.post('/', [auth, upload.single('bill')], async (req, res) => {
         
         // Process recurring expenses immediately after creating a new recurring expense
         if (expense.isRecurring) {
-            await processRecurringExpenses();
+            const timezone = req.headers['x-timezone'] || 'Asia/Kolkata';
+            await processRecurringExpenses(req.user.id, timezone);
         }
         
         res.json(expense);
