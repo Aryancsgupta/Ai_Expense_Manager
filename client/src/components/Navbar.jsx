@@ -97,12 +97,18 @@ const Navbar = () => {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute left-0 sm:left-0 max-w-[calc(100vw-2rem)] w-60 sm:w-64 mt-2 bg-bg-card border border-glass-border rounded-2xl shadow-2xl p-3 z-50 backdrop-blur-2xl"
+                                        className="fixed top-20 right-4 left-auto sm:absolute sm:top-full sm:left-0 sm:right-auto sm:mt-2 w-64 max-w-[calc(100vw-2rem)] bg-bg-card border border-glass-border rounded-2xl shadow-2xl p-3 z-[100] backdrop-blur-2xl"
                                     >
-                                        <div className="text-xs font-bold text-text-secondary px-2 pb-2 mb-2 border-b border-glass-border uppercase tracking-wider">
-                                            Select Theme Palette
+                                        <div className="text-xs font-bold text-text-secondary px-2 pb-2 mb-2 border-b border-glass-border uppercase tracking-wider flex justify-between items-center">
+                                            <span>Select Theme Palette</span>
+                                            <button 
+                                                onClick={() => setIsThemeDropdownOpen(false)} 
+                                                className="sm:hidden text-text-secondary hover:text-white p-1"
+                                            >
+                                                ✕
+                                            </button>
                                         </div>
-                                        <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                                        <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
                                             {themes.map((t) => (
                                                 <button
                                                     key={t.id}
@@ -112,17 +118,17 @@ const Navbar = () => {
                                                         : 'hover:bg-white/10 text-text-secondary hover:text-white border border-transparent'
                                                         }`}
                                                 >
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="flex gap-0.5 items-center shrink-0">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="flex gap-1 items-center shrink-0">
                                                             {t.colors.map((c, idx) => (
                                                                 <span
                                                                     key={idx}
-                                                                    className="w-3 h-3 rounded-full border border-black/20"
+                                                                    className="w-3.5 h-3.5 rounded-full border border-black/20"
                                                                     style={{ backgroundColor: c }}
                                                                 />
                                                             ))}
                                                         </div>
-                                                        <span className="text-xs truncate">{t.name}</span>
+                                                        <span className="text-xs font-medium">{t.name}</span>
                                                     </div>
                                                     {currentTheme === t.id && <Check size={14} className="text-accent shrink-0 ml-1" />}
                                                 </button>
