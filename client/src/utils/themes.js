@@ -160,6 +160,42 @@ export const themes = [
             '--glass-border': 'rgba(189, 221, 252, 0.12)',
             '--radial-glow': 'radial-gradient(at 0% 0%, rgba(136, 189, 242, 0.25) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(106, 137, 167, 0.2) 0px, transparent 50%)'
         }
+    },
+    {
+        id: 'calm-blue',
+        name: 'Calm Blue',
+        colors: ['#57B9FF', '#517891', '#0D1926', '#77B1D4'],
+        vars: {
+            '--bg-primary': '#0D1926',
+            '--bg-secondary': '#172A3D',
+            '--bg-card': 'rgba(23, 42, 61, 0.85)',
+            '--bg-header': 'rgba(13, 25, 38, 0.85)',
+            '--text-primary': '#E6F5FF',
+            '--text-secondary': '#90D5FF',
+            '--accent': '#57B9FF',
+            '--accent-hover': '#3399FF',
+            '--accent-glow': 'rgba(87, 185, 255, 0.5)',
+            '--glass-border': 'rgba(144, 213, 255, 0.15)',
+            '--radial-glow': 'radial-gradient(at 0% 0%, rgba(87, 185, 255, 0.25) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(119, 177, 212, 0.2) 0px, transparent 50%)'
+        }
+    },
+    {
+        id: 'cool-collected',
+        name: 'Cool & Collected',
+        colors: ['#0FA4AF', '#964734', '#001C1E', '#024950'],
+        vars: {
+            '--bg-primary': '#001C1E',
+            '--bg-secondary': '#02353A',
+            '--bg-card': 'rgba(2, 53, 58, 0.85)',
+            '--bg-header': 'rgba(0, 28, 30, 0.85)',
+            '--text-primary': '#AFDDE5',
+            '--text-secondary': '#0FA4AF',
+            '--accent': '#0FA4AF',
+            '--accent-hover': '#0C8B94',
+            '--accent-glow': 'rgba(15, 164, 175, 0.5)',
+            '--glass-border': 'rgba(175, 221, 229, 0.15)',
+            '--radial-glow': 'radial-gradient(at 0% 0%, rgba(15, 164, 175, 0.25) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(150, 71, 52, 0.25) 0px, transparent 50%)'
+        }
     }
 ];
 

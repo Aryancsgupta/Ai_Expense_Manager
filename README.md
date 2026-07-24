@@ -37,12 +37,20 @@
 
 ### 6. 📊 Analytics & Budgeting
 - Visual dashboards with interactive **Recharts** (Category Breakdown Pie Chart, Spending Trend Charts, Monthly Progress).
-- Set monthly budget limits with warning alerts when nearing thresholds.
-
-### 7. 🔒 Security & User Management
-- JWT (JSON Web Token) authentication with secure password hashing (bcrypt).
-- User profile & preferred currency management.
-- Admin dashboard for user oversight.
+### 🎨 8. Dynamic Theme Switcher (11 Custom Color Palettes)
+- **Header Theme Integration**: Changing the theme dynamically updates the header background, nav pills, dropdowns, and borders to match seamlessly.
+- **11 Curated Themes**:
+  - 💜 **Cyber Purple** (Default Glassmorphism)
+  - 🔴 **Burnt Sienna** (`#E35336`, `#F5F5DC`, `#F4A460`, `#A0522D`)
+  - 🍫 **Chocolate Truffle** (`#713600`, `#C05800`, `#FDFBD4`, `#38240D`)
+  - 🧃 **Green Juice** (`#4CBB17`, `#48872B`, `#39542C`, `#293325`)
+  - 🌲 **Lush Forest** (`#2E6F40`, `#CFFFDC`, `#68BA7F`, `#253D2C`)
+  - 🌌 **Blue Eclipse** (`#272757`, `#8686AC`, `#505081`, `#0F0E47`)
+  - ⛵ **Yacht Club** (`#F2F0EF`, `#BBBDBC`, `#245F73`, `#733E24`)
+  - 🧂 **Salt & Pepper** (`#FFFFFF`, `#D4D4D4`, `#B3B3B3`, `#2B2B2B`)
+  - 🌩️ **Stormy Morning** (`#6A89A7`, `#BDDDFC`, `#88BDF2`, `#384959`)
+  - 🌊 **Calm Blue** (`#90D5FF`, `#57B9FF`, `#77B1D4`, `#517891`)
+  - 🧊 **Cool & Collected** (`#003135`, `#024950`, `#964734`, `#0FA4AF`, `#AFDDE5`)
 
 ---
 
