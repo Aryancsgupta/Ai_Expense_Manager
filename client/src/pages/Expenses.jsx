@@ -139,13 +139,14 @@ const Expenses = () => {
             const totalAmt = expenses.reduce((s, e) => s + e.amount, 0);
             doc.setTextColor(50, 50, 50);
             doc.setFontSize(12);
-            doc.text(`Total Expenses: ${currencySymbol}${totalAmt.toFixed(2)}   |   Records: ${expenses.length}`, 14, 42);
+            const totalCurrency = expenses[0]?.currency || user?.currency || 'USD';
+            doc.text(`Total Expenses: ${totalAmt.toFixed(2)} ${totalCurrency}   |   Records: ${expenses.length}`, 14, 42);
             // Table
             const tableRows = expenses.map(e => [
                 new Date(e.date).toLocaleDateString(),
                 e.title,
                 e.category,
-                `${getCurrencySymbol(e.currency || user?.currency || 'INR')}${e.amount.toFixed(2)}`,
+                `${e.amount.toFixed(2)} ${e.currency || user?.currency || 'USD'}`,
                 e.description || ''
             ]);
             autoTable(doc, {
