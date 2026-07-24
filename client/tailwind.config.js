@@ -7,25 +7,27 @@ export default {
     theme: {
         extend: {
             colors: {
-                'bg-primary': '#0f172a',
-                'bg-secondary': '#1e293b',
-                'bg-card': 'rgba(30, 41, 59, 0.75)',
-                'text-primary': '#f8fafc',
-                'text-secondary': '#94a3b8',
+                'bg-primary': 'var(--bg-primary, #0f172a)',
+                'bg-secondary': 'var(--bg-secondary, #1e293b)',
+                'bg-card': 'var(--bg-card, rgba(30, 41, 59, 0.8))',
+                'bg-header': 'var(--bg-header, rgba(15, 23, 42, 0.85))',
+                'text-primary': 'var(--text-primary, #f8fafc)',
+                'text-secondary': 'var(--text-secondary, #94a3b8)',
                 'accent': {
-                    DEFAULT: '#a855f7',
-                    hover: '#9333ea',
-                    glow: 'rgba(168, 85, 247, 0.5)',
+                    DEFAULT: 'var(--accent, #a855f7)',
+                    hover: 'var(--accent-hover, #9333ea)',
+                    glow: 'var(--accent-glow, rgba(168, 85, 247, 0.5))',
                 },
-                'glass-border': 'rgba(255, 255, 255, 0.08)',
+                'glass-border': 'var(--glass-border, rgba(255, 255, 255, 0.08))',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
             },
             backgroundImage: {
-                'radial-glow': "radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%)",
+                'radial-glow': "var(--radial-glow)",
             },
         },
     },
     plugins: [],
 }
+
