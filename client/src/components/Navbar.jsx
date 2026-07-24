@@ -217,53 +217,15 @@ const Navbar = () => {
                             className="md:hidden bg-bg-header backdrop-blur-xl border-b border-glass-border shadow-2xl max-h-[80vh] overflow-y-auto"
                         >
                             <div className="p-6 flex flex-col gap-4">
-                                {/* Refresh Button for Mobile */}
-                                <button
-                                    onClick={() => {
-                                        window.location.reload();
-                                        setIsMobileMenuOpen(false);
-                                    }}
-                                    className="flex items-center gap-3 p-3 rounded-xl text-text-secondary hover:bg-white/5 hover:text-white transition-colors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
-                                    <span className="font-medium">Refresh</span>
-                                </button>
                                 {token ? (
                                     <>
-                                        <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+                                        <div className="flex items-center gap-3 pb-4 border-b border-glass-border">
                                             <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
                                                 <User size={20} />
                                             </div>
                                             <div>
                                                 <div className="font-bold text-white">{user?.name}</div>
                                                 <div className="text-sm text-text-secondary">{user?.email}</div>
-                                            </div>
-                                        </div>
-
-                                        {/* Mobile Theme Selector */}
-                                        <div className="pb-4 border-b border-white/10">
-                                            <div className="text-xs font-bold text-text-secondary mb-2 uppercase tracking-wider flex items-center gap-2">
-                                                <Palette size={14} className="text-accent" />
-                                                Select Theme Palette
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {themes.map((t) => (
-                                                    <button
-                                                        key={t.id}
-                                                        onClick={() => handleThemeChange(t.id)}
-                                                        className={`flex items-center gap-2 p-2 rounded-xl text-xs transition-all border ${currentTheme === t.id
-                                                            ? 'bg-accent/20 border-accent text-white font-bold'
-                                                            : 'bg-slate-800/60 border-slate-700/50 text-text-secondary'
-                                                            }`}
-                                                    >
-                                                        <div className="flex gap-0.5 items-center">
-                                                            {t.colors.slice(0, 2).map((c, idx) => (
-                                                                <span key={idx} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c }} />
-                                                            ))}
-                                                        </div>
-                                                        <span className="truncate">{t.name}</span>
-                                                    </button>
-                                                ))}
                                             </div>
                                         </div>
 
@@ -317,37 +279,10 @@ const Navbar = () => {
                                     </>
                                 ) : (
                                     <div className="flex flex-col gap-3">
-                                        {/* Mobile Theme Selector for non-logged in users */}
-                                        <div className="pb-2">
-                                            <div className="text-xs font-bold text-text-secondary mb-2 uppercase tracking-wider flex items-center gap-2">
-                                                <Palette size={14} className="text-accent" />
-                                                Select Theme Palette
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {themes.map((t) => (
-                                                    <button
-                                                        key={t.id}
-                                                        onClick={() => handleThemeChange(t.id)}
-                                                        className={`flex items-center gap-2 p-2 rounded-xl text-xs transition-all border ${currentTheme === t.id
-                                                            ? 'bg-accent/20 border-accent text-white font-bold'
-                                                            : 'bg-slate-800/60 border-slate-700/50 text-text-secondary'
-                                                            }`}
-                                                    >
-                                                        <div className="flex gap-0.5 items-center">
-                                                            {t.colors.slice(0, 2).map((c, idx) => (
-                                                                <span key={idx} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c }} />
-                                                            ))}
-                                                        </div>
-                                                        <span className="truncate">{t.name}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
                                         <Link to="/login" className="btn btn-secondary w-full justify-center" onClick={() => setIsMobileMenuOpen(false)}>Login</Link>
                                         <Link to="/register" className="btn btn-primary w-full justify-center" onClick={() => setIsMobileMenuOpen(false)}>Create Account</Link>
                                     </div>
                                 )}
-
                             </div>
                         </motion.div>
                     )}
