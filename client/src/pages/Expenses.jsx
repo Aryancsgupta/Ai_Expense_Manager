@@ -525,35 +525,146 @@ const Expenses = () => {
                                 </thead>
                                 <tbody>
                                     {expenses.map(exp => (
-                                        <tr key={exp._id}>
-                                            <td className="text-text-secondary text-sm whitespace-nowrap">{new Date(exp.date).toLocaleDateString()}</td>
-                                            <td>
-                                                <div className="font-semibold text-white flex items-center gap-2">
-                                                    {exp.title}
-                                                    {exp.isRecurring && <RefreshCw size={12} className="text-accent flex-shrink-0" />}
-                                                </div>
-                                                {exp.description && <div className="text-xs text-text-secondary mt-0.5 truncate max-w-[120px] sm:max-w-[150px]">{exp.description}</div>}
-                                            </td>
-                                            <td className="whitespace-nowrap"><span className="badge badge-accent">{exp.category}</span></td>
-                                            <td className="font-bold text-white whitespace-nowrap">-{getCurrencySymbol(exp.currency || 'USD')}{exp.amount.toFixed(2)}</td>
-                                            <td className="whitespace-nowrap">
-                                                <div className="flex items-center gap-2">
-                                                    {exp.billUrl && <a href={`${API_URL}${exp.billUrl}`} target="_blank" rel="noreferrer" className="p-1.5 hover:bg-white/5 rounded-lg text-text-secondary transition-colors"><FileText size={18} /></a>}
-                                                    <button
-                                                        onClick={() => openEditModal(exp)}
-                                                        className="p-1.5 hover:bg-accent/10 rounded-lg text-text-secondary hover:text-accent transition-colors"
-                                                        title="Edit expense"
-                                                    >
-                                                        <Pencil size={18} />
-                                                    </button>
-                                                    <button onClick={() => deleteExpense(exp._id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-text-secondary hover:text-red-400 transition-colors"><Trash2 size={18} /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        editingExpense?._id === exp._id ? (
+                                            <tr key={exp._id} className="bg-accent/5 border-y-2 border-accent/40 animate-fade-in">
+                                                <td colSpan="5" className="p-4 bg-slate-900/90 backdrop-blur-md">
+                                                    <form onSubmit={onEditSubmit} className="flex flex-col gap-4">
+                                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                                            <h3 className="text-base font-bold text-white flex items-center gap-2">
+                                                                <div className="bg-accent/20 p-1.5 rounded-lg text-accent"><Pencil size={16} /></div>
+                                                                Editing Expense: <span className="text-accent">{exp.title}</span>
+                                                            </h3>
+                                                            <button
+                                                                type="button"
+                                                                onClick={closeEditModal}
+                                                                className="p-1 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors"
+                                                                title="Close"
+                                                            >
+                                                                <X size={18} />
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                            <div className="space-y-1">
+                                                                <label className="text-xs font-medium text-text-secondary">Title</label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="title"
+                                                                    value={editForm.title}
+                                                                    onChange={onEditChange}
+                                                                    required
+                                                                    className="input-field py-1.5 px-3 text-sm h-auto"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-xs font-medium text-text-secondary">Amount</label>
+                                                                <input
+                                                                    type="number"
+                                                                    name="amount"
+                                                                    value={editForm.amount}
+                                                                    onChange={onEditChange}
+                                                                    required
+                                                                    min="0.01"
+                                                                    step="0.01"
+                                                                    className="input-field py-1.5 px-3 text-sm h-auto"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-xs font-medium text-text-secondary">Category</label>
+                                                                <select name="category" value={editForm.category} onChange={onEditChange} required className="input-field py-1.5 px-3 text-sm h-auto">
+                                                                    <option value="">Select Category</option>
+                                                                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                                                </select>
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-xs font-medium text-text-secondary">Date</label>
+                                                                <input
+                                                                    type="date"
+                                                                    name="date"
+                                                                    value={editForm.date}
+                                                                    onChange={onEditChange}
+                                                                    required
+                                                                    className="input-field py-1.5 px-3 text-sm h-auto"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-xs font-medium text-text-secondary">Time</label>
+                                                                <input
+                                                                    type="time"
+                                                                    name="time"
+                                                                    value={editForm.time}
+                                                                    onChange={onEditChange}
+                                                                    required
+                                                                    className="input-field py-1.5 px-3 text-sm h-auto"
+                                                                />
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <label className="text-xs font-medium text-text-secondary">Description</label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="description"
+                                                                    value={editForm.description}
+                                                                    onChange={onEditChange}
+                                                                    placeholder="Optional"
+                                                                    className="input-field py-1.5 px-3 text-sm h-auto"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex justify-end gap-3 pt-2 border-t border-white/5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={closeEditModal}
+                                                                className="btn btn-secondary py-1.5 px-4 text-xs h-auto"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                            <button
+                                                                type="submit"
+                                                                className="btn btn-primary py-1.5 px-5 text-xs h-auto flex items-center justify-center gap-1.5"
+                                                                disabled={editLoading}
+                                                            >
+                                                                {editLoading ? 'Saving...' : <><Check size={14} /> Save Changes</>}
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            <tr key={exp._id}>
+                                                <td className="text-text-secondary text-sm whitespace-nowrap">{new Date(exp.date).toLocaleDateString()}</td>
+                                                <td>
+                                                    <div className="font-semibold text-white flex items-center gap-2">
+                                                        {exp.title}
+                                                        {exp.isRecurring && <RefreshCw size={12} className="text-accent flex-shrink-0" />}
+                                                    </div>
+                                                    {exp.description && <div className="text-xs text-text-secondary mt-0.5 truncate max-w-[120px] sm:max-w-[150px]">{exp.description}</div>}
+                                                </td>
+                                                <td className="whitespace-nowrap"><span className="badge badge-accent">{exp.category}</span></td>
+                                                <td className="font-bold text-white whitespace-nowrap">-{getCurrencySymbol(exp.currency || 'USD')}{exp.amount.toFixed(2)}</td>
+                                                <td className="whitespace-nowrap">
+                                                    <div className="flex items-center gap-2">
+                                                        {exp.billUrl && <a href={`${API_URL}${exp.billUrl}`} target="_blank" rel="noreferrer" className="p-1.5 hover:bg-white/5 rounded-lg text-text-secondary transition-colors"><FileText size={18} /></a>}
+                                                        <button
+                                                            onClick={() => openEditModal(exp)}
+                                                            className="p-1.5 hover:bg-accent/10 rounded-lg text-text-secondary hover:text-accent transition-colors"
+                                                            title="Edit expense"
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+                                                        <button onClick={() => deleteExpense(exp._id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-text-secondary hover:text-red-400 transition-colors"><Trash2 size={18} /></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
                         </>)}
 
                         {/* Recurring Templates Tab */}
@@ -661,122 +772,6 @@ const Expenses = () => {
                 </div>
             </div>
 
-            {/* Edit Expense Modal */}
-            {editingExpense && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                    {/* Backdrop */}
-                    <div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={closeEditModal}
-                    />
-                    {/* Modal */}
-                    <div className="relative card w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in my-auto">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold flex items-center gap-2">
-                                <div className="bg-accent/10 p-2 rounded-lg text-accent"><Pencil size={18} /></div>
-                                Edit Expense
-                            </h3>
-                            <button
-                                onClick={closeEditModal}
-                                className="p-1.5 hover:bg-white/10 rounded-lg text-text-secondary transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <form onSubmit={onEditSubmit} className="flex flex-col gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-text-secondary">Title</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    value={editForm.title}
-                                    onChange={onEditChange}
-                                    required
-                                    className="input-field"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-text-secondary">Amount</label>
-                                    <input
-                                        type="number"
-                                        name="amount"
-                                        value={editForm.amount}
-                                        onChange={onEditChange}
-                                        required
-                                        min="0.01"
-                                        step="0.01"
-                                        className="input-field"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-text-secondary">Category</label>
-                                    <select name="category" value={editForm.category} onChange={onEditChange} required className="input-field">
-                                        <option value="">Select</option>
-                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-text-secondary">Date</label>
-                                    <input
-                                        type="date"
-                                        name="date"
-                                        value={editForm.date}
-                                        onChange={onEditChange}
-                                        required
-                                        className="input-field"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-text-secondary">Time</label>
-                                    <input
-                                        type="time"
-                                        name="time"
-                                        value={editForm.time}
-                                        onChange={onEditChange}
-                                        required
-                                        className="input-field"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-text-secondary">Description</label>
-                                <input
-                                    type="text"
-                                    name="description"
-                                    value={editForm.description}
-                                    onChange={onEditChange}
-                                    placeholder="Optional"
-                                    className="input-field"
-                                />
-                            </div>
-
-                            <div className="flex gap-3 mt-2">
-                                <button
-                                    type="button"
-                                    onClick={closeEditModal}
-                                    className="btn btn-secondary flex-1"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary flex-1 flex items-center justify-center gap-2"
-                                    disabled={editLoading}
-                                >
-                                    {editLoading ? 'Saving...' : <><Check size={16} /> Save Changes</>}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
