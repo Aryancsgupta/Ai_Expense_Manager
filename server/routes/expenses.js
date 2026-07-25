@@ -148,7 +148,7 @@ router.post('/', [auth, upload.single('bill')], async (req, res) => {
             billUrl,
             user: req.user.id,
             isRecurring: isRecurring === 'true',
-            frequency,
+            frequency: (isRecurring === 'true' && (!frequency || frequency === 'none')) ? 'daily' : frequency,
             currency: finalCurrency,
             originalAmount: originalAmt
         });

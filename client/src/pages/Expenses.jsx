@@ -95,7 +95,15 @@ const Expenses = () => {
 
     const onChange = (e) => {
         const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-        setFormData({ ...formData, [e.target.name]: value });
+        if (e.target.name === 'isRecurring') {
+            setFormData(prev => ({
+                ...prev,
+                isRecurring: value,
+                frequency: value && prev.frequency === 'none' ? 'daily' : (value ? prev.frequency : 'none')
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [e.target.name]: value }));
+        }
     };
 
     const handleFilterChange = (e) => {
