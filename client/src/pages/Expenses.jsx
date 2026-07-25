@@ -629,7 +629,7 @@ const Expenses = () => {
                                                                 className="btn btn-primary py-1.5 px-5 text-xs h-auto flex items-center justify-center gap-1.5"
                                                                 disabled={editLoading}
                                                             >
-                                                                {editLoading ? 'Saving...' : <><Check size={14} /> Save Changes</>}
+                                                                {editLoading ? 'Saving...' : <span className="flex items-center gap-1.5"><Check size={14} /> Save Changes</span>}
                                                             </button>
                                                         </div>
                                                     </form>
@@ -665,6 +665,7 @@ const Expenses = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
                         </>)}
 
                         {/* Recurring Templates Tab */}
