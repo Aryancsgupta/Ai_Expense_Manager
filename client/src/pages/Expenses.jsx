@@ -663,14 +663,14 @@ const Expenses = () => {
 
             {/* Edit Expense Modal */}
             {editingExpense && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
                     {/* Backdrop */}
                     <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                         onClick={closeEditModal}
                     />
                     {/* Modal */}
-                    <div className="relative card w-full max-w-md shadow-2xl animate-fade-in">
+                    <div className="relative card w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in my-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold flex items-center gap-2">
                                 <div className="bg-accent/10 p-2 rounded-lg text-accent"><Pencil size={18} /></div>

@@ -250,14 +250,14 @@ const Budget = () => {
 
             {/* Edit Budget Modal */}
             {editingBudget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
                     {/* Backdrop */}
                     <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                         onClick={closeEditModal}
                     />
                     {/* Modal */}
-                    <div className="relative card w-full max-w-sm shadow-2xl animate-fade-in">
+                    <div className="relative card w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in my-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold flex items-center gap-2">
                                 <div className="bg-accent/10 p-2 rounded-lg text-accent"><Pencil size={18} /></div>
@@ -403,9 +403,9 @@ const Budget = () => {
 
             {/* Update Savings Modal */}
             {editingGoal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingGoal(null)} />
-                    <div className="relative card w-full max-w-sm shadow-2xl animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingGoal(null)} />
+                    <div className="relative card w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in my-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold flex items-center gap-2">
                                 <div className="bg-emerald-500/10 p-2 rounded-lg text-emerald-400"><TrendingUp size={18} /></div>
