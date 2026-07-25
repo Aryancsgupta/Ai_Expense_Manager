@@ -37,11 +37,23 @@ const Expenses = () => {
         frequency: 'none',
         currency: user?.currency || 'USD'
     });
+    const getCurrentMonthDates = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const firstDay = `${year}-${month}-01`;
+        const lastDayObj = new Date(year, now.getMonth() + 1, 0);
+        const lastDay = `${year}-${month}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
+        return { startDate: firstDay, endDate: lastDay };
+    };
+
+    const defaultMonthDates = getCurrentMonthDates();
+
     const [filters, setFilters] = useState({
         search: '',
         category: '',
-        startDate: '',
-        endDate: ''
+        startDate: defaultMonthDates.startDate,
+        endDate: defaultMonthDates.endDate
     });
     const [bill, setBill] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -108,6 +120,15 @@ const Expenses = () => {
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const setCurrentMonthFilter = () => {
+        const dates = getCurrentMonthDates();
+        setFilters(prev => ({ ...prev, startDate: dates.startDate, endDate: dates.endDate }));
+    };
+
+    const clearDateFilter = () => {
+        setFilters(prev => ({ ...prev, startDate: '', endDate: '' }));
     };
 
     const exportToCSV = () => {
@@ -502,13 +523,39 @@ const Expenses = () => {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" size={18} />
                                 <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="Search expenses..." className="input-field pl-10 w-full" />
                             </div>
-                            <div className="flex flex-wrap gap-2 w-full">
-                                <select name="category" value={filters.category} onChange={handleFilterChange} className="input-field py-2 px-3 h-auto text-sm flex-1 min-w-[120px]">
-                                    <option value="">All Categories</option>
-                                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                </select>
-                                <input type="date" name="startDate" value={filters.startDate} onChange={handleFilterChange} className="input-field py-2 px-3 h-auto text-sm flex-1 min-w-[120px]" placeholder="From" />
-                                <input type="date" name="endDate" value={filters.endDate} onChange={handleFilterChange} className="input-field py-2 px-3 h-auto text-sm flex-1 min-w-[120px]" placeholder="To" />
+                            <div className="flex flex-wrap gap-2 w-full items-center justify-between">
+                                <div className="flex flex-wrap gap-2 flex-1 min-w-[280px]">
+                                    <select name="category" value={filters.category} onChange={handleFilterChange} className="input-field py-2 px-3 h-auto text-sm flex-1 min-w-[120px]">
+                                        <option value="">All Categories</option>
+                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    </select>
+                                    <input type="date" name="startDate" value={filters.startDate} onChange={handleFilterChange} className="input-field py-2 px-3 h-auto text-sm flex-1 min-w-[120px]" title="From Date" />
+                                    <input type="date" name="endDate" value={filters.endDate} onChange={handleFilterChange} className="input-field py-2 px-3 h-auto text-sm flex-1 min-w-[120px]" title="To Date" />
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                    <button
+                                        type="button"
+                                        onClick={setCurrentMonthFilter}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                            filters.startDate === defaultMonthDates.startDate && filters.endDate === defaultMonthDates.endDate
+                                                ? 'bg-accent/20 border-accent/40 text-white shadow-sm'
+                                                : 'bg-white/5 border-glass-border text-text-secondary hover:text-white'
+                                        }`}
+                                    >
+                                        This Month
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={clearDateFilter}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                            !filters.startDate && !filters.endDate
+                                                ? 'bg-accent/20 border-accent/40 text-white shadow-sm'
+                                                : 'bg-white/5 border-glass-border text-text-secondary hover:text-white'
+                                        }`}
+                                    >
+                                        All Time
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
