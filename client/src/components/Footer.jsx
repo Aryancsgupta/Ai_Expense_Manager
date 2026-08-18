@@ -9,10 +9,10 @@ const Footer = () => {
           <p className="text-text-secondary text-sm flex-col gap-2">
             Contact: <a href="mailto:ag8080677@gmail.com" className="text-accent hover:text-accent-hover transition-colors">ag8080677@gmail.com</a>
           </p>
-           <p className="text-text-secondary text-sm mt-2">
+          <p className="text-text-secondary text-sm mt-2">
             LinkedIn:{" "}
             <a
-              href="https://www.linkedin.com/in/aryan-gupta-8080677/"
+              href="https://www.linkedin.com/in/aryan-gupta-680632285"
               target="_blank"
               rel="noopener noreferrer"
               className="text-accent hover:text-accent-hover transition-colors"
