@@ -134,19 +134,21 @@ const Insights = () => {
                             </div>
                             {categoryChartData.length > 0 ? (
                                 <>
-                                    <ResponsiveContainer width="100%" height={160}>
-                                        <PieChart>
-                                            <Pie data={categoryChartData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
-                                                {categoryChartData.map((_, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip
-                                                contentStyle={{ background: '#1e1b4b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                                                formatter={(value) => [`${currencySymbol}${Number(value).toFixed(2)}`, '']}
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
+                                    <div className="w-full min-w-0 h-[160px]">
+                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
+                                            <PieChart>
+                                                <Pie data={categoryChartData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
+                                                    {categoryChartData.map((_, index) => (
+                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip
+                                                    contentStyle={{ background: '#1e1b4b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                                                    formatter={(value) => [`${currencySymbol}${Number(value).toFixed(2)}`, '']}
+                                                />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
                                     <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
                                         {categoryChartData.map((entry, i) => (
                                             <div key={entry.name} className="flex items-center gap-1.5 text-xs text-text-secondary">
